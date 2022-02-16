@@ -47,6 +47,7 @@ class CustomModal extends Component {
                         <FormGroup>
                             <Label for="completed">
                                 <Input 
+                                    className="me-2"
                                     type="checkbox"
                                     name="completed"
                                     checked={this.state.activeItem.completed}
