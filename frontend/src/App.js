@@ -1,4 +1,5 @@
 import {Component} from 'react'
+import CustomModal from './components/Modal';
 import './App.css';
 
 const todoItems = [
@@ -34,7 +35,30 @@ class App extends Component {
     this.state = {
       viewCompleted: false,
       todoList: todoItems,
+      modal: false,
+      activeItem: {
+        title: "",
+        description: "",
+        completed: false,
+      }
     }
+  }
+  toggle = () => {
+    this.setState({modal: !this.state.modal})
+  }
+  handleSubmit = item => {
+    this.toggle()
+    alert('Saved! ' + JSON.stringify(item))
+  }
+  handleDelete = item => {
+    alert('Deleted! ' + JSON.stringify(item))
+  }
+  createItem = () => {
+    const item = {title: "", description: "", completed: false}
+    this.setState({activeItem: item, modal: !this.state.modal})
+  }
+  editItem = item => {
+    this.setState({activeItem: item, modal: !this.state.modal})
   }
   displayCompleted = status => {
     if (status) {
@@ -67,8 +91,8 @@ class App extends Component {
         <span className={`todo-title me-2 ${this.state.viewCompleted ? "completed-todo" : ""}`}
         title={item.title}>{item.title}</span>
         <span>
-          <button className='btn btn-info me-2'>Edit</button>
-          <button className='btn btn-danger me-2'>Delete</button>
+          <button className='btn btn-info me-2' onClick={() => this.editItem(item)}>Edit</button>
+          <button className='btn btn-danger me-2' onClick={() => this.handleDelete(item)}>Delete</button>
         </span>
       </li>
     ))
@@ -80,7 +104,7 @@ class App extends Component {
         <div className='row'>
           <div className='col-md-6 col-sma-10 mx-auto p-0'>
             <div className='card p-3'>
-              <div><button className='btn btn-warning'>Add Todo</button></div>
+              <div><button className='btn btn-warning' onClick={() => this.createItem}>Add Todo</button></div>
               {this.renderTabList()}
               <ul className='list-group list-group-flush'>
                 {this.renderItems()}
@@ -91,6 +115,9 @@ class App extends Component {
         <footer className='my-3 mb-2 bg-info text-white text-center'>
           Copyright &copy;2022 All rights reserved.
         </footer>
+        {this.state.modal ? (
+          <CustomModal activeItem={this.state.activeItem} toggle={this.toggle} onSave={this.handleSubmit} />
+        ) : null}
       </main>
     )
   }
