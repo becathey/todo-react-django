@@ -1,40 +1,14 @@
 import {Component} from 'react'
-import CustomModal from './components/Modal';
+import Modal from './components/Modal';
+import axios from 'axios'
 import './App.css';
-
-const todoItems = [
-  {
-    id: 1,
-    title: "Go to grocery store",
-    description: "Buy ingredients to cook lunch.",
-    completed: true
-  },
-  {
-    id: 2,
-    title: "Exercise",
-    description: "Do strength routine.",
-    completed: false
-  },
-  {
-    id: 3,
-    title: "Go to library",
-    description: "Check out new books to read.",
-    completed: true
-  },
-  {
-    id: 4,
-    title: "Web application",
-    description: "Build web application with React and Django.",
-    completed: false
-  }
-]
 
 class App extends Component {
   constructor(props) {
     super(props)
     this.state = {
       viewCompleted: false,
-      todoList: todoItems,
+      todoList: [],
       modal: false,
       activeItem: {
         title: "",
@@ -43,15 +17,34 @@ class App extends Component {
       }
     }
   }
+  componentDidMount() {
+    this.refreshList()
+  }
+  refreshList = () => {
+    axios
+    .get("http://localhost:8000/api/todos/")
+    .then(res => this.setState({todoList: res.data}))
+    .catch(err => console.log(err))
+  }
   toggle = () => {
     this.setState({modal: !this.state.modal})
   }
   handleSubmit = item => {
     this.toggle()
-    alert('Saved! ' + JSON.stringify(item))
+    if (item.id) {
+      axios
+        .put(`http://localhost:8000/api/todos/${item.id}/`, item)
+        .then(res => this.refreshList())
+      return
+    }
+    axios
+      .post("http://localhost:8000/api/todos/", item)
+      .then(res => this.refreshList())
   }
   handleDelete = item => {
-    alert('Deleted! ' + JSON.stringify(item))
+    axios
+      .delete(`http://localhost:8000/api/todos/${item.id}/`)
+      .then(res => this.refreshList())
   }
   createItem = () => {
     const item = {title: "", description: "", completed: false}
@@ -104,7 +97,7 @@ class App extends Component {
         <div className='row'>
           <div className='col-md-6 col-sma-10 mx-auto p-0'>
             <div className='card p-3'>
-              <div><button className='btn btn-warning' onClick={() => this.createItem}>Add Todo</button></div>
+              <div><button className='btn btn-warning' onClick={this.createItem}>Add Todo</button></div>
               {this.renderTabList()}
               <ul className='list-group list-group-flush'>
                 {this.renderItems()}
@@ -116,7 +109,7 @@ class App extends Component {
           Copyright &copy;2022 All rights reserved.
         </footer>
         {this.state.modal ? (
-          <CustomModal activeItem={this.state.activeItem} toggle={this.toggle} onSave={this.handleSubmit} />
+          <Modal activeItem={this.state.activeItem} toggle={this.toggle} onSave={this.handleSubmit} />
         ) : null}
       </main>
     )
